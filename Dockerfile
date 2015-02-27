@@ -11,7 +11,6 @@ WORKDIR /root
 RUN git clone https://github.com/progrium/dokku.git
 
 WORKDIR /root/dokku
-RUN git checkout 929-mh-conditionally-run-buildstack
 RUN ./bootstrap.sh
 
 RUN locale-gen en_US.UTF-8
