@@ -3,18 +3,21 @@ MAINTAINER Jonas Svatos <lsde@lsde.org>
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y wget git openssh-server supervisor
-RUN groupadd -g 1001 docker
-RUN useradd -u 1000 -G 1001 dokku
-USER root
-WORKDIR /root
-RUN git clone https://github.com/progrium/dokku.git
+ADD 99_norecommands /etc/apt/apt.conf.d/99_norecommands
 
-WORKDIR /root/dokku
-RUN ./bootstrap.sh
+
+RUN apt-get update && apt-get install -y wget git \ 
+	openssh-server supervisor ca-certificates apt-transport-https 
+
+
+RUN wget -nv -O - https://get.docker.com/ | sh
+RUN wget -nv -O - https://packagecloud.io/gpg.key | apt-key add -
+RUN echo "deb https://packagecloud.io/dokku/dokku/ubuntu/ trusty main" | tee /etc/apt/sources.list.d/dokku.list
+RUN apt-get update -qq && apt-get install -y dokku aufs-tools 
+RUN apt-get install -y linux-image-extra-$(uname -r)
+
 
 RUN locale-gen en_US.UTF-8
-RUN locale-gen cs_CZ.UTF-8
 RUN mkdir /var/run/sshd
 RUN ln -sf /home/dokku/HOSTNAME /home/dokku/VHOST
 # SSH login fix. Otherwise user is kicked off after login
@@ -22,4 +25,8 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 22 80 443
-CMD ["/usr/bin/supervisord"]
+VOLUME ["/home/dokku"]
+
+ADD start /start
+RUN chmod 755 /start
+CMD ["/start"]

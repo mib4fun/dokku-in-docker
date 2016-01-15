@@ -1,0 +1,10 @@
+#!/bin/bash
+
+apt-get install herokuish -y
+
+if [ -f "/root/.firstrun" ]; then
+    echo $PUBKEY | sshcommand acl-add dokku ${USERNAME}
+    echo $VHOSTNAME > /home/dokku/VHOST
+fi
+
+/usr/bin/supervisord
