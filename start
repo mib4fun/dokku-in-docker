@@ -1,10 +1,11 @@
 #!/bin/bash
 
-apt-get install herokuish -y
+# install remaing hero
+# apt-get install herokuish -y
+docker pull gliderlabs/herokuish
 
-if [ -f "/root/.firstrun" ]; then
-    echo $PUBKEY | sshcommand acl-add dokku ${USERNAME}
-    echo $VHOSTNAME > /home/dokku/VHOST
-fi
+mkdir -p /root/.ssh
+cat /root/.ssh/authorized_keys | sshcommand acl-add dokku admin
+echo $VHOSTNAME > /home/dokku/VHOST
 
 /usr/bin/supervisord
